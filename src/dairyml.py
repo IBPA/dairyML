@@ -2,6 +2,7 @@ from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
 import numpy as np
+import matplotlib.pyplot as plt
 
 class PerfectClassifierMeanRegressor():        
     def fit(self,X,y):
@@ -32,4 +33,12 @@ class PerfectClassifierMeanRegressor():
             self.scores.append(r2_score(y_true=y_test,y_pred=y_pred))
             
         return self.scores
+
+		
+def plot_r2(model,model_name,X,Y):
+    y_pred = model.predict(X)
+    plt.scatter(x=Y,y=y_pred,s=3)
+    plt.xlabel('Actual value')
+    plt.ylabel('Predicted value')
+    plt.title('Actual vs. Predicted Values, {}'.format(model_name))
 		
