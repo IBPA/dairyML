@@ -3,6 +3,9 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.base import BaseEstimator, RegressorMixin
+import pandas as pd
 
 class PerfectClassifierMeanRegressor():        
     def fit(self,X,y):
@@ -41,4 +44,54 @@ def plot_r2(model,model_name,X,Y):
     plt.xlabel('Actual value')
     plt.ylabel('Predicted value')
     plt.title('Actual vs. Predicted Values, {}'.format(model_name))
+	
+	
+class BoundedLasso(BaseEstimator,RegressorMixin):
+    def __init__(self, alpha=None):
+        self.alpha = alpha
+        
+    def fit(self,X,y):
+        self.lasso = Lasso(self.alpha)
+        self.lasso.fit(X,y)
+    
+    def get_coef(self):
+        return self.lasso.coef_
+    
+    def predict(self, x):
+        pred_orig = self.lasso.predict(x)
+        return np.clip(pred_orig,0,np.max(pred_orig))
+		
+class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
+    def __init__(self, alpha=None, C=None):
+        self.alpha = alpha
+        self.C = C
+
+    def fit(self,X,y):
+        self.bounded_lasso = BoundedLasso(alpha=self.alpha)
+        self.logreg = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
+        self.bounded_lasso.fit(X,y)
+        y_binary = y != 0
+        self.logreg.fit(X,y_binary)
+        return self
+        
+    def predict(self, X):
+        pred_lasso = self.bounded_lasso.predict(X)
+        pred_logreg = self.logreg.predict(X)
+        pred = np.multiply(pred_lasso,pred_logreg)
+        return pred
+		
+def plot_coefficients(model,X):
+    try:
+        nonzero_coef_index = model.coef_ != 0
+        coefficients = pd.DataFrame()
+        coefficients['Feature'] = X.columns
+        coefficients['coef'] = model.coef_
+    except AttributeError:
+        nonzero_coef_index = model.get_coef() != 0
+        coefficients = pd.DataFrame()
+        coefficients['Feature'] = X.columns
+        coefficients['coef'] = model.get_coef()
+    axs = coefficients[coefficients['coef']!=0].sort_values('coef').plot.barh(x='Feature',y='coef')
+    axs.set_title('Feature Coefficients')
+    axs.set_xlabel('Coefficient')
 		
