@@ -13,8 +13,8 @@ class PerfectClassifierMeanRegressor():
         self.y = y
         self.regressor = DummyRegressor(strategy='mean')
         
-    def cross_val(self,k=10):
-        self.scores = []
+    def cross_val(self,scoring,k=10):
+        self.scores = {}
         splitter = KFold(n_splits=k,shuffle=True,random_state=7)   
         for train_index, test_index in splitter.split(self.X,self.y):
             
@@ -32,10 +32,17 @@ class PerfectClassifierMeanRegressor():
             reg_pred = self.regressor.predict(X_test)
             
             y_pred = np.multiply(y_test_binary,reg_pred)
-            
-            self.scores.append(r2_score(y_true=y_test,y_pred=y_pred))
+            for name, scorer in scoring.items():
+                print(scorer)
+                try:
+                    self.scores[name].append(scorer(y_true=y_test,y_pred=y_pred))
+                except KeyError:
+                    self.scores[name] = scorer(y_true=y_test,y_pred=y_pred)
             
         return self.scores
+	
+    def get_params(self):
+        return(self.regressor.get_params())
 
 		
 def plot_r2(model,model_name,X,Y):
