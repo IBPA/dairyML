@@ -1,0 +1,9 @@
+,r2,SRC,PCC,MI,MAE
+Dummy Mean,-0.02,0.0,-0.0,-0.0,1.94
+Dummy Median All,-0.32,0.0,-0.0,-0.0,1.68
+Dummy Median Nonzero,-0.08,0.0,-0.0,-0.0,1.77
+"Perfect Clasif., Mean Regr.",0.13,0.73,0.41,0.53,1.53
+Lasso,0.45,0.61,0.7,3.07,1.23
+Bounded Lasso,0.55,0.64,0.75,2.87,1.08
+Bounded Lasso + LogReg,0.64,0.8,0.82,2.66,0.86
+FFNN,0.66,0.7,0.83,3.58,0.96
