@@ -6,5 +6,6 @@ Dummy Median Nonzero,-0.08,0.0,-0.0,-0.0,1.77
 Lasso,0.45,0.61,0.7,3.07,1.23
 Bounded Lasso,0.55,0.64,0.75,2.87,1.08
 Bounded Lasso + LogReg,0.64,0.8,0.82,2.66,0.86
-FFNN,0.66,0.7,0.83,3.58,0.96
-XGB Combined,0.84,0.9,0.92,3.04,0.4
+FFNN (Regressor Only),0.77,0.78,0.88,3.07,0.66
+XGB Regressor,0.8,0.85,0.9,3.06,0.47
+XGB Combined,0.82,0.9,0.91,3.04,0.43
