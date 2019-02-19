@@ -22,6 +22,12 @@
 
 4. ##### Place your test data in `data/` directory
 
+   First create the directory:
+
+   `mkdir data` 
+
+   Then place the testing csv file in the new directory.
+
    Make sure that the test data columns match the columns of `data/training_for_GS_122118.csv`
 
 5. ##### Run the test script
