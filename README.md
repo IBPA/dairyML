@@ -70,7 +70,7 @@ N_SPLITS = 10
 N_REPEATS = 5
 ```
 
-To new values in` test.py` 
+to new values in` test.py` 
 
 
 
