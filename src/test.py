@@ -6,8 +6,8 @@ import os, sys, getopt, datetime
 import pickle as pkl
 import pandas as pd
 import numpy as np
-from xgboost import XGBRegressor, XGBClassifier
 
+from xgboost import XGBRegressor, XGBClassifier
 from dairyml import XGBCombined
 
 from skll.metrics import spearman, pearson
@@ -19,12 +19,17 @@ from sklearn.ensemble import IsolationForest
 import warnings
 warnings.filterwarnings("ignore")
 
+
+N_SPLITS = 10
+N_REPEATS = 5
+
 def main(argv):
 
 	if len(argv) < 2:
 		print('Not enough arguments specified\n Usage: test.py <model path> <input file path>')
 		return
 	else: 
+
 		#Load the model
 		model_path = argv[0]
 		print('Loading model at {}'.format(model_path))
@@ -56,7 +61,7 @@ def main(argv):
 		Y = data['lac.per.100g'][outliers == 1]
 
 		#splitter for CV
-		splitter= RepeatedKFold(n_splits=10,n_repeats=5)
+		splitter= RepeatedKFold(n_splits=N_SPLITS,n_repeats=N_REPEATS)
 
 		#scoring
 		scoring = {'r2':make_scorer(r2_score), 
@@ -70,11 +75,14 @@ def main(argv):
 		results_dir = '../reports/'
 		results_path = '../reports/test_results_'+time+'.csv'
 
+		overall_results = pd.DataFrame(columns = scoring.keys())
+
 		if not os.path.exists(results_dir):
 			os.makedirs(results_dir)
 
-		print('Testing the model...')
+		print('Testing the model... ({}-fold CV, repeated {}x)'.format(N_SPLITS,N_REPEATS))
 		xgb_combined_results = cross_validate(model,X,Y,cv=splitter,scoring=scoring)
+
 
 		print('\nResults: ')
 		for score_name in scoring.keys():
