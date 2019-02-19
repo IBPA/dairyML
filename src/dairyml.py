@@ -9,8 +9,6 @@ from sklearn.linear_model import Lasso, LogisticRegression
 from sklearn.base import BaseEstimator, RegressorMixin
 import pandas as pd
 
-
-
 import warnings
 import numpy as np
 import scipy.sparse as sp
@@ -24,6 +22,30 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.random import random_choice_csc
 from sklearn.utils.stats import _weighted_percentile
 from sklearn.utils.multiclass import class_distribution
+
+from xgboost import XGBRegressor, XGBClassifier
+
+
+class XGBCombined(BaseEstimator,RegressorMixin):
+    def __init__(self, max_depth_reg=None, max_depth_clas=None, importance_type='gain'):
+        self.max_depth_reg = max_depth_reg
+        self.max_depth_clas = max_depth_clas
+        self.importance_type = importance_type
+
+    def fit(self,X,y):
+        self.reg = XGBRegressor(max_depth=self.max_depth_reg,colsample_bytree=0.9,importance_type=self.importance_type)
+        self.clas = XGBClassifier(max_depth=self.max_depth_clas,importance_type=self.importance_type)
+        self.reg.fit(X,y)
+        y_binary = y != 0
+        y_binary = y_binary.astype(int)
+        self.clas.fit(X,y_binary)
+        return self
+        
+    def predict(self, X):
+        pred_reg = self.reg.predict(X)
+        pred_clas = self.clas.predict(X)
+        pred = np.multiply(pred_reg,pred_clas)
+        return pred
 
 class PerfectClassifierMeanRegressor():        
     def fit(self,X,y):
@@ -303,3 +325,4 @@ class DummyRegressorCustom(BaseEstimator, RegressorMixin):
             X = np.zeros(shape=(len(y), 1))
         return super().score(X, y, sample_weight)
 		
+
