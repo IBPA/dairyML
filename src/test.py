@@ -21,22 +21,19 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-N_SPLITS = 10
-N_REPEATS = 5
-
 def main(argv):
 
 	if len(argv) < 2:
 		print('Not enough arguments specified\n Usage: test.py <model path> <input file path>')
 		return
 	else: 
-		#Load the model
+		#Load the model, pretrained on the full training data
 		model_path = argv[0]
 		print('Loading model at {}'.format(model_path))
 		with open(model_path, "rb" ) as f:
 			model = pkl.load(f)
 
-		#Load data
+		#Load test data
 		data_path = argv[1]
 		print('Loading data at {}'.format(data_path))
 		data = pd.read_csv(data_path)
@@ -48,30 +45,25 @@ def main(argv):
 		ss = StandardScaler()
 		X = pd.DataFrame(ss.fit_transform(data[numerical_features]),columns=data[numerical_features].columns,index=data.index)
 
+		# get the target variable
 		Y = data['lac.per.100g']
 
-		# shuffle the data
-		X, Y = shuffle(X,Y)
-
-		#scoring
+		#list scoring measure names and functions
 		scoring = {'r2':r2_score, 
 		   'SRC':spearman, 
 		   'PCC':pearson, 
 		   'MI':mutual_info_score, 
 		   'MAE':mean_absolute_error}
 
-		time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-
 		results_dir = '../reports/'
-		results_path = '../reports/test_results_'+time+'.csv'
 
-		overall_results = pd.DataFrame(columns = scoring.keys())
+		results = pd.DataFrame(columns = scoring.keys())
 
 		if not os.path.exists(results_dir):
 			os.makedirs(results_dir)
 
-		print('Testing the model... '.format(N_SPLITS,N_REPEATS))
-		# Predictions
+		# Get model predictions
+		print('Testing the model... ')
 		Y_pred = model.predict(X)
 
 		#score the predictions
@@ -79,9 +71,13 @@ def main(argv):
 		for name, metric in scoring.items():
 			score = np.round(metric(Y,Y_pred))
 			print('{}: {}'.format(name,score))
-			overall_results.loc['XGB Combined',name] = score
+			results.loc['XGB Combined',name] = score
 
-		overall_results.to_csv(results_path)
+		#store the results
+		time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+		results_path = '../reports/test_results_'+time+'.csv'
+
+		results.to_csv(results_path)
 		print('\nResults saved to {}'.format(results_path))
 		return
 
