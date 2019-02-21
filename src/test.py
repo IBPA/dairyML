@@ -75,7 +75,7 @@ def main(argv):
 
 		#store the results
 		time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-		results_path = '../reports/test_results_'+time+'.csv'
+		results_path = 'reports/test_results_'+time+'.csv'
 
 		results.to_csv(results_path)
 		print('\nResults saved to {}'.format(results_path))
