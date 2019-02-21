@@ -41,24 +41,22 @@
    Example output:
 
    ```
-   (dmltest) C:\Users\Gabriel\DairyML>python src/test.py models/xgb_combined.model
-   data/training_for_GS_122118.csv
+   (dmltest) C:\Users\Gabriel\DairyML>python src/test.py models\xgb_combined.model
+   data\training_for_GS_122118.csv
    Loading modules...
-   Loading model at models/xgb_combined.model
-   Loading data at data/training_for_GS_122118.csv
+   Loading model at models\xgb_combined.model
+   Loading data at data\training_for_GS_122118.csv
    Scaling input features...
-   Removing outliers...
-   Outliers removed: 5
-   Testing the model... (10-fold CV, repeated 5x)
+   Testing the model...
    
    Results:
-   r2: 0.81
-   SRC: 0.9
-   PCC: 0.91
-   MI: 3.02
-   MAE: 0.44
+   r2: 1.0
+   SRC: 1.0
+   PCC: 1.0
+   MI: 4.0
+   MAE: 0.0
    
-   Results saved to ../reports/test_results_2019-02-19-11-08-34.csv
+   Results saved to reports/test_results_2019-02-21-10-24-34.csv
    ```
 
 6. ##### Results are stored to csv in reports/
@@ -68,17 +66,6 @@
 ### Using the model in your own code
 
 This starter code has not been tested, but this is what using the model would look like. It is stored as a binary object using pickle, and can be loaded using pickle.load.
-
-See the test script for more info. If you simply want to change the cross-validation parameters, these can be adjusted by changing
-
-```
-N_SPLITS = 10
-N_REPEATS = 5
-```
-
-to new values in` test.py` 
-
-
 
 Ex code
 
@@ -95,7 +82,6 @@ with open(model_path, "rb" ) as f:
 #do stuff with the model, e.g.
 #X = features
 #Y = target variable
-model.fit(X,Y)
 predictions = model.predict(X_new)
 
 ```
