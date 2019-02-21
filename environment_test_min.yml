@@ -16,5 +16,4 @@ dependencies:
   - python=3.6.8
   - scikit-learn=0.20.1
   - skll=1.5.3
-prefix: C:\Users\Gabriel\AppData\Local\conda\conda\envs\dmltest
 
