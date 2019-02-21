@@ -6,7 +6,7 @@
 
 2. ##### Clone or download the repository
 
-    `git clone https://github.com/g-simmons/dairyML.git` 
+   `git clone https://github.com/g-simmons/dairyML.git` 
 
    or download using the green "clone or download" button on the right
 
@@ -14,7 +14,7 @@
 
    `cd DairyML`
 
-   `conda env create -f environment_test_min.yml`
+   `conda env create -f environment_test_min.yml python=3.6`
 
    `conda activate dmltest`
 
