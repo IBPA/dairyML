@@ -84,12 +84,12 @@ def main(argv):
 		#score the predictions
 		print('\nResults: ')
 		for name, metric in scoring_full.items():
-			score = np.round(metric(Y,Y_pred))
+			score = np.round(metric(Y,Y_pred),2)
 			print('{}: {}'.format(name,score))
 			results.loc['XGB Combined',name] = score
 
 		for name, metric in scoring_clf.items():
-			score = np.round(metric(Y_binary,Y_pred_clas))
+			score = np.round(metric(Y_binary,Y_pred_clas),2)
 			print('{}: {}'.format(name,score))
 			results.loc['XGB Combined',name] = score
 
