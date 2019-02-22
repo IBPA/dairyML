@@ -13,7 +13,7 @@ from dairyml import XGBCombined
 from skll.metrics import spearman, pearson
 from sklearn.utils import shuffle
 from sklearn.model_selection import cross_validate, RepeatedKFold
-from sklearn.metrics import r2_score, mutual_info_score, make_scorer, mean_absolute_error
+from sklearn.metrics import r2_score, mutual_info_score, make_scorer, mean_absolute_error, accuracy_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 
@@ -47,38 +47,61 @@ def main(argv):
 
 		# get the target variable
 		Y = data['lac.per.100g']
+		Y_binary = (Y != 0)
 
 		#list scoring measure names and functions
-		scoring = {'r2':r2_score, 
+		scoring_full = {'r2':r2_score, 
 		   'SRC':spearman, 
 		   'PCC':pearson, 
 		   'MI':mutual_info_score, 
 		   'MAE':mean_absolute_error}
 
+		scoring_clf = {'classifier_accuracy': accuracy_score, 
+		   'classifier_f1': f1_score }
+
 		results_dir = '../reports/'
 
-		results = pd.DataFrame(columns = scoring.keys())
+		results = pd.DataFrame()
 
 		if not os.path.exists(results_dir):
 			os.makedirs(results_dir)
 
 		# Get model predictions
 		print('Testing the model... ')
+		# full predictions
 		Y_pred = model.predict(X)
+		# regressor predictions
+		Y_pred_reg = model.reg.predict(X)
+		#classifier predictions
+		Y_pred_clas = model.clas.predict(X)
+
+		predictions = pd.DataFrame()
+		predictions['Y'] = Y
+		predictions['Y_pred'] = Y_pred
+		predictions['Y_pred_reg'] = Y_pred_reg
+		predictions['Y_pred_clas'] = Y_pred_clas
 
 		#score the predictions
 		print('\nResults: ')
-		for name, metric in scoring.items():
+		for name, metric in scoring_full.items():
 			score = np.round(metric(Y,Y_pred))
+			print('{}: {}'.format(name,score))
+			results.loc['XGB Combined',name] = score
+
+		for name, metric in scoring_clf.items():
+			score = np.round(metric(Y_binary,Y_pred_clas))
 			print('{}: {}'.format(name,score))
 			results.loc['XGB Combined',name] = score
 
 		#store the results
 		time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 		results_path = 'reports/test_results_'+time+'.csv'
+		predictions_path = 'reports/test_predictions_'+time+'.csv'
 
 		results.to_csv(results_path)
+		predictions.to_csv(predictions_path)
 		print('\nResults saved to {}'.format(results_path))
+		print('\nPredictions saved to {}'.format(predictions_path))
 		return
 
 if __name__ == "__main__":
