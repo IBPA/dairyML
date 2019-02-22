@@ -41,7 +41,7 @@
    Example output:
 
    ```
-   (dmltest) C:\Users\Gabriel\DairyML>python src/test.py models\xgb_combined.model
+   (dmltest) C:\Users\Gabriel\DairyML>python src\test.py models\xgb_combined.model
    data\training_for_GS_122118.csv
    Loading modules...
    Loading model at models\xgb_combined.model
@@ -55,11 +55,15 @@
    PCC: 1.0
    MI: 4.0
    MAE: 0.0
+   classifier_accuracy: 1.0
+   classifier_f1: 1.0
    
-   Results saved to reports/test_results_2019-02-21-10-24-34.csv
+   Results saved to reports/test_results_2019-02-21-20-26-24.csv
+   
+   Predictions saved to reports/test_predictions_2019-02-21-20-26-24.csv
    ```
 
-6. ##### Results are stored to csv in reports/
+6. ##### Results and predictions are stored to csv in reports/
 
 
 
