@@ -113,16 +113,16 @@ class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
         self.C = C
 
     def fit(self,X,y):
-        self.bounded_lasso = BoundedLasso(alpha=self.alpha)
-        self.logreg = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
-        self.bounded_lasso.fit(X,y)
+        self.reg = BoundedLasso(alpha=self.alpha)
+        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
+        self.reg.fit(X,y)
         y_binary = y != 0
-        self.logreg.fit(X,y_binary)
+        self.clas.fit(X,y_binary)
         return self
         
     def predict(self, X):
-        pred_lasso = self.bounded_lasso.predict(X)
-        pred_logreg = self.logreg.predict(X)
+        pred_lasso = self.reg.predict(X)
+        pred_logreg = self.clas.predict(X)
         pred = np.multiply(pred_lasso,pred_logreg)
         return pred
 		
