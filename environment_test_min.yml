@@ -16,4 +16,5 @@ dependencies:
   - python
   - scikit-learn
   - skll
+  - keras
 
