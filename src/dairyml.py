@@ -5,7 +5,7 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.linear_model import Lasso, LogisticRegression, Ridge
 from sklearn.base import BaseEstimator, RegressorMixin
 import pandas as pd
 
@@ -107,6 +107,21 @@ class BoundedLasso(BaseEstimator,RegressorMixin):
         pred_orig = self.lasso.predict(x)
         return np.clip(pred_orig,0,np.max(pred_orig))
 		
+class BoundedRidge(BaseEstimator,RegressorMixin):
+    def __init__(self, alpha=None):
+        self.alpha = alpha
+        
+    def fit(self,X,y):
+        self.ridge = Ridge(self.alpha)
+        self.ridge.fit(X,y)
+    
+    def get_coef(self):
+        return self.ridge.coef_
+    
+    def predict(self, x):
+        pred_orig = self.ridge.predict(x)
+        return np.clip(pred_orig,0,np.max(pred_orig))
+		
 class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
     def __init__(self, alpha=None, C=None):
         self.alpha = alpha
@@ -125,6 +140,26 @@ class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
         pred_logreg = self.clas.predict(X)
         pred = np.multiply(pred_lasso,pred_logreg)
         return pred
+
+		
+class BoundedRidgePlusLogReg(BaseEstimator,RegressorMixin):
+    def __init__(self, alpha=None, C=None):
+        self.alpha = alpha
+        self.C = C
+
+    def fit(self,X,y):
+        self.reg = BoundedRidge(alpha=self.alpha)
+        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
+        self.reg.fit(X,y)
+        y_binary = y != 0
+        self.clas.fit(X,y_binary)
+        return self
+        
+    def predict(self, X):
+        pred_ridge = self.reg.predict(X)
+        pred_logreg = self.clas.predict(X)
+        pred = np.multiply(pred_ridge,pred_logreg)
+        return pred		
 		
 def plot_coefficients(model,X):
     try:
