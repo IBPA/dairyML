@@ -130,4 +130,3 @@ dependencies:
     - ruamel.yaml==0.15.86
     - skll==1.5.3
     - soupsieve==1.7.2
-prefix: C:\Users\Gabriel\AppData\Local\conda\conda\envs\DairyML
