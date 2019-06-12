@@ -56,7 +56,8 @@ class PerfectClassifierMeanRegressor():
     def cross_val(self,scoring,k=10):
         self.scores = {}
         for name, scorer in scoring.items():
-            self.scores[name] = []
+            for split in ['train','test']:
+                self.scores[split+'_'+name] = []
         splitter = KFold(n_splits=k,shuffle=True,random_state=7)   
         for train_index, test_index in splitter.split(self.X,self.y):
             
@@ -68,30 +69,34 @@ class PerfectClassifierMeanRegressor():
             
             # get test y class labels for perfect classification
             y_test_binary = y_test != 0
+            y_train_binary = y_train != 0
 
             self.regressor.fit(X_train,y_train)
             
-            reg_pred = self.regressor.predict(X_test)
+            reg_pred_test = self.regressor.predict(X_test)
+            reg_pred_train = self.regressor.predict(X_train)
             
-            y_pred = np.multiply(y_test_binary,reg_pred)
+            y_pred_test = np.multiply(y_test_binary,reg_pred_test)
+            y_pred_train = np.multiply(y_train_binary,reg_pred_train)
             for name, scorer in scoring.items():
-                self.scores[name].append(scorer(y_test,y_pred))
+                self.scores['test_'+name].append(scorer(y_test,y_pred_test))
+                self.scores['train_'+name].append(scorer(y_train,y_pred_train))
 
                 
         return self.scores
-	
+    
     def get_params(self):
         return(self.regressor.get_params())
 
-		
+        
 def plot_r2(model,model_name,X,Y):
     y_pred = model.predict(X)
     plt.scatter(x=Y,y=y_pred,s=3)
     plt.xlabel('Actual value')
     plt.ylabel('Predicted value')
     plt.title('Actual vs. Predicted Values, {}'.format(model_name))
-	
-	
+    
+    
 class BoundedLasso(BaseEstimator,RegressorMixin):
     def __init__(self, alpha=None):
         self.alpha = alpha
@@ -106,7 +111,7 @@ class BoundedLasso(BaseEstimator,RegressorMixin):
     def predict(self, x):
         pred_orig = self.lasso.predict(x)
         return np.clip(pred_orig,0,np.max(pred_orig))
-		
+        
 class BoundedRidge(BaseEstimator,RegressorMixin):
     def __init__(self, alpha=None):
         self.alpha = alpha
@@ -121,7 +126,7 @@ class BoundedRidge(BaseEstimator,RegressorMixin):
     def predict(self, x):
         pred_orig = self.ridge.predict(x)
         return np.clip(pred_orig,0,np.max(pred_orig))
-		
+        
 class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
     def __init__(self, alpha=None, C=None):
         self.alpha = alpha
@@ -141,7 +146,7 @@ class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
         pred = np.multiply(pred_lasso,pred_logreg)
         return pred
 
-		
+        
 class BoundedRidgePlusLogReg(BaseEstimator,RegressorMixin):
     def __init__(self, alpha=None, C=None):
         self.alpha = alpha
@@ -159,8 +164,8 @@ class BoundedRidgePlusLogReg(BaseEstimator,RegressorMixin):
         pred_ridge = self.reg.predict(X)
         pred_logreg = self.clas.predict(X)
         pred = np.multiply(pred_ridge,pred_logreg)
-        return pred		
-		
+        return pred     
+        
 def plot_coefficients(model,X):
     try:
         nonzero_coef_index = model.coef_ != 0
@@ -175,7 +180,7 @@ def plot_coefficients(model,X):
     axs = coefficients[coefficients['coef']!=0].sort_values('coef').plot.barh(x='Feature',y='coef')
     axs.set_title('Feature Coefficients')
     axs.set_xlabel('Coefficient')
-	
+    
 class DummyRegressorCustom(BaseEstimator, RegressorMixin):
     """
     DummyRegressor is a regressor that makes predictions using
@@ -256,7 +261,7 @@ class DummyRegressorCustom(BaseEstimator, RegressorMixin):
                 self.constant_ = [_weighted_percentile(y[:, k], sample_weight,
                                                        percentile=50.)
                                   for k in range(self.n_outputs_)]
-		
+        
         elif self.strategy == "median_nonzero":
             if sample_weight is None:
                 self.constant_ = np.median(y[y > 0], axis=0)
@@ -359,5 +364,17 @@ class DummyRegressorCustom(BaseEstimator, RegressorMixin):
         if X is None:
             X = np.zeros(shape=(len(y), 1))
         return super().score(X, y, sample_weight)
-		
-
+        
+def scores_to_df(df,model_name,scores,refit):
+    cv_results = False
+    for split in ['train','test']:
+        for score_name in scores.keys():
+            if 'mean_train_' in score_name or 'mean_test_' in score_name:
+                df.loc[model_name,score_name[5:]] = np.round(scores[score_name][np.argmax(scores['mean_test_'+refit])],2)
+                cv_results = True
+        if not cv_results:
+            for score_name in scores.keys():
+                if 'train_' in score_name or 'test_' in score_name:
+                    df.loc[model_name,score_name] = np.round(np.mean(scores[score_name]),2)
+                    cv_results = True
+    return df
