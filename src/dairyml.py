@@ -369,15 +369,16 @@ class DummyRegressorCustom(BaseEstimator, RegressorMixin):
         return super().score(X, y, sample_weight)
         
 def scores_to_df(df,model_name,scores,refit):
+    prefix = 'cv_'
     cv_results = False
     for split in ['train','test']:
         for score_name in scores.keys():
             if 'mean_train_' in score_name or 'mean_test_' in score_name:
-                df.loc[model_name,score_name[5:]] = np.round(scores[score_name][np.argmax(scores['mean_test_'+refit])],2)
+                df.loc[model_name,prefix+score_name[5:]] = np.round(scores[score_name][np.argmax(scores['mean_test_'+refit])],2)
                 cv_results = True
         if not cv_results:
             for score_name in scores.keys():
                 if 'train_' in score_name or 'test_' in score_name:
-                    df.loc[model_name,score_name] = np.round(np.mean(scores[score_name]),2)
+                    df.loc[model_name,prefix+score_name] = np.round(np.mean(scores[score_name]),2)
                     cv_results = True
     return df
