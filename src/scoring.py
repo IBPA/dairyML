@@ -4,6 +4,6 @@ from skll.metrics import spearman, pearson
 
 scoring = {'r2':make_scorer(r2_score), 
            'SRC':make_scorer(spearman), 
-           'PCC':make_scorer(pearson), 
+           'PCC':make_scorer(lambda x,y: pearson(x.flatten(),y.flatten())), 
            'MI':make_scorer(mutual_info_regression), 
            'MAE':make_scorer(mean_absolute_error)}

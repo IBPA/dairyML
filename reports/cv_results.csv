@@ -1,5 +1,9 @@
-,test_r2,train_r2,test_SRC,train_SRC,test_PCC,train_PCC,test_MI,train_MI,test_MAE,train_MAE
-Dummy Mean,-0.02,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.94,1.93
-Dummy Median All,-0.32,-0.29,0.0,0.0,0.0,0.0,0.0,0.0,1.68,1.68
-Dummy Median Nonzero,-0.08,-0.06,0.0,0.0,0.0,0.0,0.0,0.0,1.77,1.77
-"Perfect Clasif., Mean Regr.",0.13,0.13,0.73,0.73,0.41,0.4,0.48,0.52,1.53,1.53
+,test_r2,train_r2,test_SRC,train_SRC,test_PCC,train_PCC,test_MI,train_MI,test_MAE,train_MAE,test_accuracy,train_accuracy,test_recall,train_recall
+Dummy Mean,-0.02,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.94,1.93,,,,
+Dummy Median All,-0.32,-0.29,0.0,0.0,0.0,0.0,0.0,0.0,1.68,1.68,,,,
+Dummy Median Nonzero,-0.08,-0.06,0.0,0.0,0.0,0.0,0.0,0.0,1.77,1.77,,,,
+"Perfect Clasif., Mean Regr.",0.13,0.13,0.73,0.73,0.41,0.4,0.49,0.51,1.53,1.53,,,,
+Lasso,0.45,0.59,0.61,0.67,0.7,0.78,0.41,0.69,1.23,1.1,,,,
+Bounded Lasso,0.55,0.66,0.64,0.69,0.75,0.82,0.42,0.65,1.08,0.97,,,,
+Logistic Regression Classifier,,,,,,,,,,,0.89,1.0,0.95,1.0
+Bounded Lasso + LogReg,0.64,0.74,0.8,0.89,0.82,0.87,0.61,0.86,0.86,0.74,,,,
