@@ -48,16 +48,18 @@ class XGBCombined(BaseEstimator,RegressorMixin):
         return pred
 
 class PerfectClassifierMeanRegressor():        
-    def fit(self,X,y):
+    def fit(self,X: pd.DataFrame, y: pd.Series):
         self.X = X
         self.y = y
         self.regressor = DummyRegressor(strategy='mean')
         
     def cross_val(self,scoring,k=10):
         self.scores = {}
+
         for name, scorer in scoring.items():
             for split in ['train','test']:
                 self.scores[split+'_'+name] = []
+
         splitter = KFold(n_splits=k,shuffle=True,random_state=7)   
         for train_index, test_index in splitter.split(self.X,self.y):
             
@@ -68,16 +70,17 @@ class PerfectClassifierMeanRegressor():
             y_test = self.y.values[test_index]
             
             # get test y class labels for perfect classification
-            y_test_binary = y_test != 0
-            y_train_binary = y_train != 0
+            y_test_binary = (y_test != 0)
+            y_train_binary = (y_train != 0)
 
-            self.regressor.fit(X_train,y_train)
+            self.regressor.fit(X_train,y_train.reshape(-1,1))
             
-            reg_pred_test = self.regressor.predict(X_test)
-            reg_pred_train = self.regressor.predict(X_train)
-            
+            reg_pred_test = self.regressor.predict(X_test).flatten()
+            reg_pred_train = self.regressor.predict(X_train).flatten()
+
             y_pred_test = np.multiply(y_test_binary,reg_pred_test)
             y_pred_train = np.multiply(y_train_binary,reg_pred_train)
+
             for name, scorer in scoring.items():
                 self.scores['test_'+name].append(scorer(y_test,y_pred_test))
                 self.scores['train_'+name].append(scorer(y_train,y_pred_train))
