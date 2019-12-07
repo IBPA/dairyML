@@ -48,8 +48,11 @@ def main(argv):
 
         #Scale the features to 0 mean and unit variance
         print('Scaling input features...')
-        ss = StandardScaler()
-        X = pd.DataFrame(ss.fit_transform(data[numerical_features]),columns=data[numerical_features].columns,index=data.index)
+        train_means = np.loadtxt('./scaling/train_feature_means.csv',delimiter=',')
+        train_vars = np.loadtxt('./scaling/train_feature_variances.csv',delimiter=',')
+
+        X = (data[numerical_features] - train_means) / np.sqrt(train_vars)
+
 
         # get the target variable
         Y = data['lac.per.100g']
