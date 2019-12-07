@@ -33,7 +33,7 @@ def main(argv):
         model_path = argv[0]
         print('Loading model at {}'.format(model_path))
         if 'ffnn' in model_path:
-            from keras.models import load_model
+            from tensorflow.keras.models import load_model
             model = load_model(model_path)
         else:
             with open(model_path, "rb" ) as f:

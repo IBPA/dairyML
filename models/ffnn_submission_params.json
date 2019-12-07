@@ -1,0 +1,11 @@
+ {
+ "hidden_layers":2,
+"num_nodes":50,
+"alpha":0.029,
+"lr":0.0012,
+"epochs":185
+}
+
+
+
+
