@@ -46,7 +46,7 @@ def main(argv):
         data = data.set_index('FoodCode')
         numerical_features = data.columns[1:-1]
 
-        print(data[numerical_features])
+        # print(data[numerical_features])
 
         #Scale the features to 0 mean and unit variance
         print('Scaling input features...')
