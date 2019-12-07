@@ -5,4 +5,4 @@ src/__pycache__/
 pkl/trials/
 reports/test_results*
 reports/test_predictions*
-
+graphics/
