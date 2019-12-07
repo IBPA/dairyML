@@ -165,8 +165,9 @@ class BoundedRidgePlusLogReg(BaseEstimator,RegressorMixin):
         
     def predict(self, X):
         pred_ridge = self.reg.predict(X)
-        pred_logreg = self.clas.predict(X)
+        pred_logreg = self.clas.predict(X).reshape(-1,1)
         pred = np.multiply(pred_ridge,pred_logreg)
+
         return pred     
         
 def plot_coefficients(model,X):
