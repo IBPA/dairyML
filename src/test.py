@@ -38,6 +38,11 @@ def my_load_model(model_path):
 
     return model
 
+def load_outlier_model():
+    with open('./models/isoforest.model', "rb" ) as f:
+        iso = pkl.load(f)
+
+    return iso
 
 def scale_data(data):
     print('Scaling input features...')
@@ -47,11 +52,17 @@ def scale_data(data):
 
     return scaled_data
 
-def get_model_predictions(model,X):
+def get_model_predictions(model,outlier_model,X):
     # Get model predictions
     print('Testing the model... ')
     # full predictions
     predictions = pd.DataFrame(index=X.index)
+
+    predictions['outlier_status'] = outlier_model.predict(X)
+
+    n_outliers = (predictions['outlier_status'] == -1).sum()
+
+    print('Outliers Identified: {}'.format(n_outliers))
 
     Y_pred = model.predict(X)
 
@@ -72,25 +83,25 @@ def get_model_predictions(model,X):
 
     return predictions
 
-def score_predictions(predictions,model_name):
+def score_predictions(predictions,model_name,suffix):
     results = pd.DataFrame()
     #score the predictions
-    print('\nResults: ')
+    print('\nResults ({}): '.format(suffix))
     for name, metric in scoring_test.items():
         score = np.round(metric(predictions['Y'],predictions['Y_pred']),2)
         print('{}: {}'.format(name,score))
-        results.loc[model_name,name] = score
+        results.loc[model_name,name+'_'+suffix] = score
 
     if not all(np.isnan(predictions['Y_pred_clas'])):
         for name, metric in scoring_clf.items():
             score = np.round(metric(predictions['Y_binary'],predictions['Y_pred_clas']),2)
             print('{}: {}'.format(name,score))
-            results.loc[model_name,name] = score
+            results.loc[model_name,name+'_'+suffix] = score
     else:
         for name, metric in scoring_clf.items():
             score = np.nan
             print('{}: {}'.format(name,score))
-            results.loc[model_name,name] = score
+            results.loc[model_name,name+'_'+suffix] = score
 
     return results
 
@@ -104,6 +115,7 @@ def main(argv):
         #Load the model, pretrained on the full training data
         model_path = argv[0]
         model = my_load_model(model_path)
+        iso = load_outlier_model()
 
         #Load test data
         data_path = argv[1]
@@ -119,23 +131,26 @@ def main(argv):
         Y = data['lac.per.100g']
 
         # get model predictions
-        predictions = get_model_predictions(model,X)
+        predictions = get_model_predictions(model,iso,X)
         predictions['Y'] = Y #actual values
         predictions['Y_binary'] = (Y != 0)
 
         # score the predictions
         model_name = os.path.basename(model_path).replace('.model','')
-        results = score_predictions(predictions,model_name)
+        results_all = score_predictions(predictions,model_name,'all')
+        results_inliers = score_predictions(predictions.loc[predictions.outlier_status == 1,:],model_name,'inliers')
 
         #store the results
         time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        results_path = 'reports/test_results_'+time+'.csv'
+        results_path_all = 'reports/test_results_all_'+time+'.csv'
+        results_path_inliers = 'reports/test_results_inliers_'+time+'.csv'
         predictions_path = 'reports/test_predictions_'+time+'.csv'
 
-        results.to_csv(results_path)
+        results_all.to_csv(results_path_all)
+        results_inliers.to_csv(results_path_inliers)
         predictions.to_csv(predictions_path)
 
-        print('\nResults saved to {}'.format(results_path))
+        print('\nResults saved to {}, {}'.format(results_path_all,results_path_inliers))
         print('\nPredictions saved to {}'.format(predictions_path))
 
         return
