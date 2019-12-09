@@ -383,22 +383,3 @@ def scores_to_df(df,model_name,scores,refit):
                     df.loc[model_name,prefix+score_name] = np.round(np.mean(scores[score_name]),2)
                     cv_results = True
     return df
-
-def coef_of_var_to_df(df,model_name,scores,refit,k):
-    prefix = 'cv_'
-    if len([v for v in scores.keys() if 'mean' in v]) > 0:
-        metrics = np.unique(pd.Series([v for v in scores.keys() if 'split' in v]).str.extract('_.*_(.+)$'))
-
-        indv_results = pd.DataFrame()
-        for metric in metrics:
-            for i in range(0,k):
-                indv_results.loc[i,metric] = scores['split{}_test_{}'.format(str(i),metric)][np.argmax(scores['mean_test_'+refit])]
-
-        df.loc[model_name,:] = indv_results.std()/indv_results.mean()
-
-    else:
-        metrics = np.unique(pd.Series([v for v in scores.keys() if 'test' in v]).str.extract('_(.+)$'))
-        for metric in metrics:
-            df.loc[model_name,metric] = scores['test_'+metric].std()/scores['test_'+metric].mean()
-
-    return df
