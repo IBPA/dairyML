@@ -6,3 +6,5 @@ pkl/trials/
 reports/test_results*
 reports/test_predictions*
 graphics/
+src/main.ipynb
+src/test_all.py

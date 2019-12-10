@@ -27,14 +27,16 @@ from xgboost import XGBRegressor, XGBClassifier
 
 
 class XGBCombined(BaseEstimator,RegressorMixin):
-    def __init__(self, max_depth_reg=None, max_depth_clas=None, importance_type='gain'):
+    def __init__(self, random_state,seed,max_depth_reg=None, max_depth_clas=None, importance_type='gain'):
         self.max_depth_reg = max_depth_reg
         self.max_depth_clas = max_depth_clas
         self.importance_type = importance_type
+        self.random_state = random_state
+        self.seed = seed
 
     def fit(self,X,y):
-        self.reg = XGBRegressor(max_depth=self.max_depth_reg,colsample_bytree=0.9,importance_type=self.importance_type)
-        self.clas = XGBClassifier(max_depth=self.max_depth_clas,importance_type=self.importance_type)
+        self.reg = XGBRegressor(max_depth=self.max_depth_reg,random_state=self.random_state,seed=self.seed,colsample_bytree=0.9,importance_type=self.importance_type)
+        self.clas = XGBClassifier(max_depth=self.max_depth_clas,random_state=self.random_state,seed=self.seed,importance_type=self.importance_type)
         self.reg.fit(X,y)
         y_binary = y != 0
         y_binary = y_binary.astype(int)
@@ -101,11 +103,12 @@ def plot_r2(model,model_name,X,Y):
     
     
 class BoundedLasso(BaseEstimator,RegressorMixin):
-    def __init__(self, alpha=None):
+    def __init__(self, random_state, alpha=None):
         self.alpha = alpha
+        self.random_state = random_state
         
     def fit(self,X,y):
-        self.lasso = Lasso(self.alpha)
+        self.lasso = Lasso(self.alpha,random_state=self.random_state)
         self.lasso.fit(X,y)
     
     def get_coef(self):
@@ -116,11 +119,12 @@ class BoundedLasso(BaseEstimator,RegressorMixin):
         return np.clip(pred_orig,0,np.max(pred_orig))
         
 class BoundedRidge(BaseEstimator,RegressorMixin):
-    def __init__(self, alpha=None):
+    def __init__(self, random_state, alpha=None):
         self.alpha = alpha
+        self.random_state = random_state
         
     def fit(self,X,y):
-        self.ridge = Ridge(self.alpha)
+        self.ridge = Ridge(self.alpha,random_state=self.random_state)
         self.ridge.fit(X,y)
     
     def get_coef(self):
@@ -131,13 +135,14 @@ class BoundedRidge(BaseEstimator,RegressorMixin):
         return np.clip(pred_orig,0,np.max(pred_orig))
         
 class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
-    def __init__(self, alpha=None, C=None):
+    def __init__(self, random_state, alpha=None, C=None):
         self.alpha = alpha
         self.C = C
+        self.random_state = random_state
 
     def fit(self,X,y):
-        self.reg = BoundedLasso(alpha=self.alpha)
-        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
+        self.reg = BoundedLasso(alpha=self.alpha,random_state=self.random_state)
+        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs',random_state=self.random_state)
         self.reg.fit(X,y)
         y_binary = y != 0
         self.clas.fit(X,y_binary)
@@ -151,13 +156,14 @@ class BoundedLassoPlusLogReg(BaseEstimator,RegressorMixin):
 
         
 class BoundedRidgePlusLogReg(BaseEstimator,RegressorMixin):
-    def __init__(self, alpha=None, C=None):
+    def __init__(self, random_state, alpha=None, C=None):
         self.alpha = alpha
         self.C = C
+        self.random_state = random_state
 
     def fit(self,X,y):
-        self.reg = BoundedRidge(alpha=self.alpha)
-        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs')
+        self.reg = BoundedRidge(alpha=self.alpha,random_state=self.random_state)
+        self.clas = LogisticRegression(penalty='l2',C=self.C,solver='lbfgs',random_state=self.random_state)
         self.reg.fit(X,y)
         y_binary = y != 0
         self.clas.fit(X,y_binary)
